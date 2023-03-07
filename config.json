@@ -1,0 +1,15 @@
+{
+	"name": "Impact",
+	"icon": "favicon.ico",
+	"port": 8471,
+	"production": true,
+	"return_errors": true,
+	"show_tray": false,
+	"blacklist": [
+		"/__pycache__/*",
+		"/rooms/*",
+		"/*.py",
+		"/*.json",
+		"/*.lnk"
+	]
+}

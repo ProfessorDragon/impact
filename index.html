@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Impact</title>
+		<link rel="icon" type="image/x-icon" href="/favicon.ico">
+        <style>
+            body {
+                margin: 0px;
+                font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+                user-select: none;
+            }
+            h1 {
+                font-size: 40px;
+                margin: 10px;
+            }
+            h2 {
+                -webkit-text-stroke: .7px black;
+                -webkit-text-fill-color: white;
+            }
+            h3 {
+                letter-spacing: .02em;
+            }
+            #menu, #help {
+                padding: 30px 40px;
+            }
+            #divider {
+                width: 8px;
+                height: 8px;
+                position: absolute;
+                background: rosybrown;
+                border-radius: 4px;
+                transform: translateX(-50%);
+                left: 50%;
+            }
+            .field {
+                width: 100%;
+                height: 100%;
+                background: black;
+                outline: 2px solid black;
+                border-radius: 10px;
+                position: relative;
+            }
+            .container {
+                position: absolute;
+                top: 72px;
+            }
+            #field1label, #field2label {
+                margin: 0px 25px 20px;
+                white-space: nowrap;
+            }
+            #field2label {
+                text-align: right;
+            }
+            #field1label.alt, #field2label.alt {
+                margin: 0px 0px 20px;
+                text-align: center;
+            }
+            #turntext {
+                position: absolute;
+                transform: translateX(-50%);
+                left: 50%;
+                margin: 0px;
+                white-space: nowrap;
+                font-size: 1.7em;
+            }
+            #fieldcont1 {
+                left: 50px;
+            }
+            #fieldcont2 {
+                right: 50px;
+            }
+            .tile {
+                width: 10%;
+                height: 10%;
+                float: left;
+                background: lightblue;
+                position: relative;
+                box-sizing: border-box;
+            }
+            .tile.alt {
+                background: skyblue;
+            }
+            .tile.hit::after, .tile.revealhit::after {
+                content: "";
+                background: red;
+                display: inline;
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                clip-path: polygon(30% 20%, 50% 40%, 70% 20%, 80% 30%, 60% 50%, 80% 70%, 70% 80%, 50% 60%, 30% 80%, 20% 70%, 40% 50%, 20% 30%);
+                z-index: 20;
+            }
+            .tile.revealhit::after {
+                opacity: .5;
+            }
+            .tile.blackshot::after {
+                background: black;
+            }
+            .tile.miss::after {
+                content: "";
+                background: white;
+                display: inline;
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                clip-path: circle(15%);
+                z-index: 20;
+            }
+            .button {
+                background: lightgreen;
+                border: 2px solid black;
+                display: inline-block;
+                padding: 4px 8px;
+                margin: 10px;
+                font-size: 25px;
+                cursor: pointer;
+                border-radius: 7px;
+            }
+            .button:hover, .button2x1:hover, .buttonsmall:hover {
+                background: palegreen;
+            }
+            .buttonsmall {
+                background: lightgreen;
+                border: 2px solid black;
+                display: inline-block;
+                padding: 2px 6px;
+                margin-left: 5px;
+                font-size: 20px;
+                cursor: pointer;
+                border-radius: 7px;
+            }
+            #playbtn {
+                padding-left: 18px;
+            }
+            #backbtn {
+                padding-left: 18px;
+                margin: 0px 30px;
+            }
+            #backbtnsmall {
+                padding-left: 12px;
+            }
+            #playbtn::before, #backbtn::before, #backbtnsmall::before {
+                content: "";
+                display: inline-block;
+                background: white;
+                width: 20px;
+                height: 25px;
+                top: 2px;
+                left: -8px;
+                clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
+                position: relative;
+            }
+            #backbtn::before, #backbtnsmall::before {
+                clip-path: polygon(100% 0%, 0% 50%, 100% 100%);
+            }
+            #backbtnsmall::before {
+                width: 15px;
+                height: 19px;
+                left: -6px;
+            }
+            #playbtn:hover::before, #backbtn:hover::before, #backbtnsmall:hover::before {
+                background: red;
+            }
+            #statustext {
+                margin: 30px;
+                margin-bottom: 20px;
+                font-size: 1.7em;
+            }
+            .ship {
+                background: darkgray;
+                width: 80%;
+                height: 80%;
+                position: absolute;
+                top: 10%;
+                left: 10%;
+                box-sizing: border-box;
+                border: 2px solid black;
+                z-index: 10;
+                border-radius: 7px;
+            }
+            .ship[draggable=true] {
+                cursor: grab;
+            }
+            .ship[draggable=true]::after {
+                content: "";
+                background: black;
+                display: inline;
+                width: 50px;
+                height: 50px;
+                position: absolute;
+                transform: translate(-50%, -50%);
+                clip-path: polygon(0% 0%, 25% 0%, 0% 25%);
+                top: 26px;
+                left: 26px;
+                border-radius: 5px;
+                opacity: .4;
+            }
+            .ship.ghost {
+                opacity: .6;
+                border-color: gray;
+            }
+            .button2x1 {
+                background: lightgreen;
+                width: 180%;
+                height: 80%;
+                position: absolute;
+                top: 10%;
+                left: 10%;
+                box-sizing: border-box;
+                border: 2px solid black;
+                z-index: 1;
+                border-radius: 10px;
+                align-items: center;
+                justify-content: center;
+                display: flex;
+                font-size: 1.5vw;
+                cursor: pointer;
+            }
+            .disabledbtn {
+                border-color: gray;
+                color: gray;
+                background: darkgray;
+                cursor: default;
+            }
+            .disabledbtn:hover {
+                background-color: darkgray;
+            }
+            .infotip {
+                width: 20px;
+                height: 20px;
+                display: inline-block;
+                text-align: center;
+                top: 100%;
+                left: 100%;
+                position: absolute;
+                border-radius: 20px;
+                border: 1px solid gray;
+                color: gray;
+                transform: translate(-50%, -50%) translate(-15px, -15px);
+                opacity: .7;
+                font-size: 17px;
+                cursor: pointer;
+            }
+            .infotip:hover {
+                opacity: 1;
+            }
+            .reldiv {
+                display: inline-block;
+                position: relative;
+            }
+            #infolabel {
+                margin: 10px 0px;
+                font-size: 24px;
+            }
+            #retrybtn {
+                display: inline-block;
+                width: 1em;
+                height: 1em;
+                border: 5px solid gray;
+                border-radius: 100%;
+                box-sizing: border-box;
+                margin-left: 15px;
+                position: relative;
+                top: 3px;
+                cursor: pointer;
+            }
+            #retrybtn::before {
+                content: "";
+                position: absolute;
+                width: 0.45em;
+                height: 0.45em;
+                background: gray;
+                display: inline-block;
+                top: 0.25em;
+                left: 0.47em;
+                clip-path: polygon(0% 0%, 50% 50%, 100% 0%);
+            }
+            #retrybtn::after {
+                content: "";
+                position: absolute;
+                width: 0.45em;
+                height: 0.45em;
+                background: white;
+                display: inline-block;
+                top: 0.25em;
+                left: 0.47em;
+                clip-path: polygon(0% 0%, 50% 50%, 100% 0%, 100% 50%, 50% 100%, 0% 50%);
+            }
+            #retrybtn:hover {
+                border-color: darkgray;
+            }
+            #retrybtn:hover::before {
+                background: darkgray;
+            }
+            .tile.radar {
+                background: forestgreen;
+            }
+            .tile.alt.radar {
+                background: green;
+            }
+            .tile.radar2 {
+                border: 2px solid red;
+            }
+            .tile.mineval::after {
+                content: attr(data-content) "";
+                transform: translate(-50%, -50%);
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                font-size: 3vw;
+            }
+            .ship.powerup::before {
+                content: "?";
+                transform: translate(-50%, -50%);
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                font-size: 2.5vw;
+                color: white;
+                -webkit-text-stroke: .7px black;
+            }
+            .tile.curtile, .tile.forcecurtile {
+                background: palegreen;
+            }
+            .pane {
+                background: lightblue;
+                width: 100%;
+                height: 100%;
+                margin: 10px;
+                border: 2px solid black;
+                border-radius: 7px;
+                display: inline-block;
+                position: relative;
+            }
+            .pane .col {
+                width: 25%;
+                height: 100%;
+                text-align: center;
+                float: left;
+                box-sizing: border-box;
+                margin-top: 7px;
+            }
+            .pane .col .subtitle {
+                border-bottom: 1px solid gray;
+                font-size: 25px;
+                margin: 0px 5%;
+                padding-bottom: 7px;
+            }
+            .pane .options {
+                text-align: left;
+                margin: 10px 10%;
+                font-size: 22px;
+            }
+            .pane .options .option {
+                padding: 5px 10px;
+                cursor: pointer;
+            }
+            .pane .options .option:hover {
+                border-left: 4px solid white;
+            }
+            .pane .options .option.selected {
+                border-left: 4px solid red;
+            }
+            #buttonsdiv {
+                margin: 20px;
+                margin-bottom: 5px;
+            }
+            #guide {
+                position: absolute;
+                width: calc(100% - 104px);
+                height: calc(100% - 180px);
+                overflow-y: scroll;
+                padding: 10px;
+                font-size: 20px;
+            }
+            #chaptersubtitle {
+                margin: 0px;
+                margin-left: 10px;
+                display: inline-block;
+            }
+            #guide .chapter h2 {
+                margin-top: 0px;
+                margin-bottom: 10px;
+                font-size: 23px;
+            }
+            #guide i::after {
+                content: " ";
+                white-space: pre;
+            }
+            #notifybox {
+                position: absolute;
+                background: lightgray;
+                border: 2px solid black;
+                border-radius: 7px;
+                display: none;
+                text-align: center;
+                transform: translate(-50%, -50%);
+                top: 50%;
+                left: 50%;
+                box-sizing: border-box;
+                box-shadow: 3px 3px black;
+                z-index: 50;
+                min-width: 400px;
+            }
+            #notifybox h2 {
+                margin: 15px 20px;
+            }
+            #notifybox p {
+                font-size: 15px 20px;
+                margin: 20px;
+            }
+            #notifybox .buttonsmall {
+                margin: 0px 0px 15px;
+                width: 10%;
+            }
+			.cols, .rows {
+				position: absolute;
+				top: 28px;
+				text-align: justify;
+				width: 90%;
+				margin: 0px;
+				padding: 0px 5%;
+			}
+			.cols::after, .rows::after {
+				content: "";
+				width: 100%;
+				display: inline-block;
+			}
+			.rows {
+				transform: rotate(-90deg) translateX(-105%);
+				transform-origin: top left;
+				left: -21px;
+			}
+        </style>
+    </head>
+    <body>
+        <div id="menu" class="layout">
+            <h1>Impact</h1>
+            <h2 style="margin: 0px 10px;">Made by Professor Dragon</h2>
+            <div id="buttonsdiv">
+                <div>
+                    <div id="playbtn" class="button" onclick="being();">Play</div>
+                    <div id="changeroombtn" class="button" onclick="change_room();">Change room</div>
+                </div>
+                <div id="prefselect" class="pane" style="display: none;">
+                    <div class="col" style="border-left: none;" value="3">
+                        <div class="subtitle">VS</div>
+                    </div>
+                    <div class="col" value="0">
+                        <div class="subtitle">Mode</div>
+                    </div>
+                    <div class="col" value="1">
+                        <div class="subtitle">Ships</div>
+                    </div>
+                    <div class="col" value="2">
+                        <div class="subtitle">Bonus</div>
+                    </div>
+                    <div class="infotip" onclick="show_layout(2);">i</div>
+                </div>
+            </div>
+            <h3 id="statustext" style="display: none;"></h3>
+            <div id="backbtn" class="button" style="display: none;" onclick="cancel_wait();">Back</div>
+        </div>
+        <div id="help" class="layout" style="display: none;">
+            <h1>Impact</h1>
+            <div>
+                <h2 id="chaptersubtitle">Chapters</h2>
+                <div class="buttonsmall" onclick="goto_chapter(0);">Gamemodes</div>
+                <div class="buttonsmall" onclick="goto_chapter(1);">Ship layouts</div>
+                <div class="buttonsmall" onclick="goto_chapter(2);">Bonus modes</div>
+                <div class="buttonsmall" onclick="goto_chapter(3);">Opponents</div>
+                <div id="backbtnsmall" class="buttonsmall" onclick="show_layout(0);">Back</div>
+            </div>
+            <div id="guide" class="pane">
+
+            </div>
+        </div>
+        <div id="game" class="layout" style="display: none;">
+            <h1>Impact</h1>
+            <div id="fieldcont1" class="container">
+                <h2 id="field1label">Your board</h2>
+                <div id="field1" class="field" value="1"></div>
+            </div>
+            <div id="divider"></div>
+            <div id="fieldcont2" class="container">
+                <h2 id="field2label">Opponent's board</h2>
+				<p class="cols" style="display: none;">0 1 2 3 4 5 6 7 8 9</p>
+				<p class="rows" style="display: none;">9 8 7 6 5 4 3 2 1 0</p>
+                <div id="field2" class="field" value="2"></div>
+            </div>
+            <h2 id="turntext"></h2>
+            <div id="notifybox">
+                <h2></h2><p></p>
+                <div class="buttonsmall" onclick="hide_notify();">OK</div>
+            </div>
+        </div>
+    </body>
+    <script src="main.js"></script>
+</html>
